@@ -9,10 +9,10 @@ export default new class RepliesServices {
 
  async create(req: Request, res: Response) {
      try {
-        const { content, image, userId, threadId } = req.body;
+        const { content, threadId } = req.body;
+        const userId = res.locals.payload.user.id
         const newReplies = await this.repliesRepository.create({
             content,
-            image,
             userId,
             threadId
         })

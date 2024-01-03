@@ -10,9 +10,6 @@ export class Replies {
   @Column()
   content: string;
   
-  @Column({nullable: true})
-  image: string;
-  
   @Column()
   userId: number;
 

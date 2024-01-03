@@ -25,6 +25,9 @@ export class User {
     profile_picture:string
 
     @Column({nullable: true})
+    cover_picture:string
+
+    @Column({nullable: true})
     profile_description:string
     
     @OneToMany (() => Thread, (thread) => thread.user, {onDelete: "CASCADE"})

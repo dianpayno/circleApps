@@ -10,6 +10,7 @@ id:number
 @Column()
 userId:number
 
+
 @Column()
 followingId:number
 

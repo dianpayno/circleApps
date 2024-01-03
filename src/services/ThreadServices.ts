@@ -2,6 +2,8 @@ import { Thread } from "../entity/Thread";
 import { AppDataSource } from "../data-source";
 import { Request, Response } from "express";
 import { Repository } from "typeorm";
+import { createClient } from "redis";
+
 
 
 export default new (class ThreadServices {
@@ -11,18 +13,36 @@ export default new (class ThreadServices {
 
   async findAll(req: Request, res: Response) {
     try {
-      const threads = await this.threadRepository.find(
-        { relations: ["user", "replies", "likes"], 
-      order: {
-        posted_at: "DESC",
-      }
-      },);
 
-     
+      const client = createClient();
+      client.on("error", (err) => console.log("Redis Client Error", err));
+     await client.connect();
+     const threads = await client.get("threads");
+  
+
+     if (threads){
+      await client.del("threads");
       return res.status(200).json({
         message: "success",
-        data: threads,
+        data: JSON.parse(threads)
+      })
+     
+     } else {
+      const data = await this.threadRepository.find({
+        relations: ["user", "replies", "likes"],
+        order: {
+          posted_at: "DESC",
+        },
+
+      })
+      await client.setEx("threads", 1, JSON.stringify(data));
+      return res.status(200).json({
+        message: "success",
+        data: data,
       });
+     
+    
+    }
     } catch (error) {
       return res.status(500).json({ message: "error saat fetch data", error });
     }
@@ -60,6 +80,7 @@ export default new (class ThreadServices {
         image,
         userId
       });
+
       await this.threadRepository.save(newThread);
       return res.status(200).json({
         message: "success",
@@ -102,4 +123,61 @@ export default new (class ThreadServices {
       return res.status(500).json({ message: "error deleting data", error });
     }
   }
+
+  async findmyThread(req: Request, res: Response) {
+    try {
+      const userId =res.locals.payload.user.id;
+      const threads = await this.threadRepository.find({
+        where: {
+          userId: userId,
+
+        },
+        relations: ["user", "replies", "likes"],
+        order: {
+          posted_at: "DESC",
+        }
+      });
+      if (!threads) {
+        return res.status(404).json({ message: "data not found" });
+      }
+      return res.status(200).json({
+        message: "success",
+        data: threads,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "error getting data by id", error });
+    }
+  }
+
+  async findSpesificThread(req: Request, res: Response) {
+    try {
+      const {id}  = req.params
+      console.log(id)
+      const threads = await this.threadRepository.find({
+        where: {
+          userId:Number(id)
+
+        },
+        relations: ["user", "replies", "likes"],
+        order: {
+          posted_at: "DESC",
+        }
+      });
+      if (!threads) {
+        return res.status(404).json({ message: "data not found" });
+      }
+      return res.status(200).json({
+        message: "success",
+        data: threads,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "error getting data by id", error });
+    }
+  }
+
+ 
 })();

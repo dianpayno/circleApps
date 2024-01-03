@@ -29,9 +29,6 @@ export default new (class AuthServices {
 
       const user = this.authRepository.create({
         id: userEmail.id,
-        email: userEmail.email,
-        full_name: userEmail.full_name,
-        profile_picture: userEmail.profile_picture,
       });
 
       const token = jwt.sign({ user }, process.env.PRIVATE_KEY as string);

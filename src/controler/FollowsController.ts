@@ -16,4 +16,11 @@ export default new class FollowController {
     delete(req: Request, res: Response) {
         FollowServices.delete(req, res)
     }
+    getDataFollowers(req: Request, res: Response) {
+        FollowServices.getDataFollowers(req, res)
+    }
+
+    getDataFollowing(req: Request, res: Response) {
+        FollowServices.getDataFollowing(req, res)
+    }
 }

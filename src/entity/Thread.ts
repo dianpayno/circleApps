@@ -12,8 +12,8 @@ export class Thread {
     @Column()
     content: string;
 
-    @Column({nullable: true})
-    image: string;
+    @Column({nullable: true, array: true, default: [], type: "text"})
+    image:string[];
 
     @Column({type: "timestamp", default: () => "CURRENT_TIMESTAMP"})
     posted_at: Date;
